@@ -1,6 +1,6 @@
 # adventofcode20
 
-Repository for my solutions to advent of code 2020
+Repository for my solutions to advent of code 2020 in R !
 
 https://adventofcode.com/2020
 
