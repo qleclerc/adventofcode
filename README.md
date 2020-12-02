@@ -10,6 +10,8 @@ Rendered html files are in the `reports` folder.
 
 Screenshots of the daily challenges (part 1 & part 2) are in the `img` folder.
 
+The `.txt` input files for the puzzles are in the `inputs` folder.
+
 You can preview any html file by prepending `https://htmlpreview.github.io/?` to the url.
 
 Example for day 1:
