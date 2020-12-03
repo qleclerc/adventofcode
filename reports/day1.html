@@ -405,8 +405,8 @@ summary {
     
   }
   
-  message(&quot;Pair of numbers: &quot;, testnum, &quot; and &quot;, target, &quot;\n&quot;,
-          &quot;Result: &quot;, result)
+  cat(&quot;Pair of numbers:&quot;, testnum, &quot;and&quot;, target,
+      &quot;\nResult:&quot;, result)
   
 }</code></pre>
 <p>Let’s first test whether this solution aligns with the example.</p>
@@ -418,7 +418,7 @@ summary {
           1456)
 
 find2020(input)</code></pre>
-<pre><code>## Pair of numbers: 1721 and 299
+<pre><code>## Pair of numbers: 1721 and 299 
 ## Result: 514579</code></pre>
 <p>It works! Now let’s try it with our puzzle input.</p>
 <pre class="r"><code>input = c(1755,   1668, 837,  1900,  1687, 1901,  1765,  1963,  1945, 1791,  1688,
@@ -441,7 +441,7 @@ find2020(input)</code></pre>
           1685,1723, 1799, 1640, 1479,1912,  1638)
 
 find2020(input)</code></pre>
-<pre><code>## Pair of numbers: 547 and 1473
+<pre><code>## Pair of numbers: 547 and 1473 
 ## Result: 805731</code></pre>
 <p>And we’ve got it! Onto the second part…</p>
 </div>
@@ -456,7 +456,8 @@ find2020(input)</code></pre>
 </div>
 <div id="solution-1" class="section level2">
 <h2>Solution</h2>
-<p>Again, here I could have switched to a more thorough step by step check, but I thought that maybe I could simply extend my first solution. Effectively, this new challenge just requires an extra step to be solved. Instead of looking for a number in the vector that <strong>matches</strong> <code>2020 - input[i]</code>, now we’re effectively looking for 2 numbers which <strong>add up to</strong> <code>2020 - input[i]</code>. So, the logic is to first work out what <code>2020 - input[i]</code> is, then for each other number <code>j</code> in the vector, test whether the value <code>2020 - input[i] - input[j]</code> exists in the vector. If so, we’ve got our answer!</p>
+<p>Again, here I could have switched to a more thorough step by step check, but I thought that maybe I could simply extend my first solution. Effectively, this new challenge just requires an extra step to be solved.</p>
+<p>Instead of looking for a number in the vector that <strong>matches</strong> <code>2020 - input[i]</code>, now we’re effectively looking for 2 numbers which <strong>add up to</strong> <code>2020 - input[i]</code>. So, the logic is to first work out what <code>2020 - input[i]</code> is, then for each other number <code>j</code> in the vector, test whether the value <code>2020 - input[i] - input[j]</code> exists in the vector. If so, we’ve got our answer!</p>
 <pre class="r"><code>find2020_extend = function(input){
   
   i = 1
@@ -489,9 +490,8 @@ find2020(input)</code></pre>
     
   }
   
-  message(&quot;Trio of numbers: &quot;, testnum, &quot;, &quot;, testnum2, &quot; and &quot;, target2,
-          &quot;\n&quot;,
-          &quot;Result: &quot;, result)
+  cat(&quot;Trio of numbers:&quot;, testnum, &quot;,&quot;, testnum2, &quot;and&quot;, target2,
+      &quot;\nResult:&quot;, result)
   
 }</code></pre>
 <p>Testing with the example…</p>
@@ -503,7 +503,7 @@ find2020(input)</code></pre>
           1456)
 
 find2020_extend(input)</code></pre>
-<pre><code>## Trio of numbers: 979, 366 and 675
+<pre><code>## Trio of numbers: 979 , 366 and 675 
 ## Result: 241861950</code></pre>
 <p>All good! So, final result:</p>
 <pre class="r"><code>input = c(1755,   1668, 837,  1900,  1687, 1901,  1765,  1963,  1945, 1791,  1688,
@@ -526,7 +526,7 @@ find2020_extend(input)</code></pre>
           1685,1723, 1799, 1640, 1479,1912,  1638)
 
 find2020_extend(input)</code></pre>
-<pre><code>## Trio of numbers: 438, 360 and 1222
+<pre><code>## Trio of numbers: 438 , 360 and 1222 
 ## Result: 192684960</code></pre>
 <p>And that’s the first day finished!</p>
 </div>
