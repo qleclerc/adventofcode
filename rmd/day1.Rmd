@@ -59,8 +59,8 @@ find2020 = function(input){
     
   }
   
-  message("Pair of numbers: ", testnum, " and ", target, "\n",
-          "Result: ", result)
+  cat("Pair of numbers:", testnum, "and", target,
+      "\nResult:", result)
   
 }
 
@@ -171,9 +171,8 @@ find2020_extend = function(input){
     
   }
   
-  message("Trio of numbers: ", testnum, ", ", testnum2, " and ", target2,
-          "\n",
-          "Result: ", result)
+  cat("Trio of numbers:", testnum, ",", testnum2, "and", target2,
+      "\nResult:", result)
   
 }
 
