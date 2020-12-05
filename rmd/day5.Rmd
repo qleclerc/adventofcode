@@ -1,5 +1,5 @@
 ---
-title: "Advent of code 2020: day 54"
+title: "Advent of code 2020: day 5"
 author: "Quentin Leclerc"
 date: "05/12/2020"
 output: html_document
