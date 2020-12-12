@@ -1,0 +1,195 @@
+---
+title: "Advent of code 2020: day 12"
+author: "Quentin Leclerc"
+date: "12/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+
+
+
+## Solution
+
+
+
+```{r solution1}
+
+move_ship = function(input){
+  
+  x = 0
+  y = 0
+  facing = "E"
+  facing_angle = 90
+  
+  for(i in 1:nrow(input)){
+    
+    move = input$move[i]
+    direction = input$direction[i]
+    
+    if(direction == "R"){
+      facing_angle = facing_angle + move
+      
+      facing_angle = facing_angle - 360 * (facing_angle %/% 360)
+      
+      facing = c("N", "E", "S", "W")[facing_angle/90 + 1]
+      
+      next
+    }
+    
+    if(direction == "L"){
+      facing_angle = facing_angle - move
+      
+      facing_angle = facing_angle - 360 * (facing_angle %/% 360)
+      
+      facing = c("N", "E", "S", "W")[facing_angle/90 + 1]
+      
+      next
+    }
+    
+    if(direction == "F"){
+      direction = facing
+    }
+    
+    if(direction == "N") x = x + move
+    if(direction == "S") x = x - move
+    if(direction == "E") y = y + move
+    if(direction == "W") y = y - move
+    
+  }
+  
+  abs(x) + abs(y)
+  
+}
+
+```
+
+
+```{r test_solution1}
+
+input = readLines(here::here("inputs", "input12ex.txt"))
+input = data.frame(move = as.numeric(gsub("[A-Z]", "", input)),
+                   direction = gsub("[0-9]", "", input))
+
+move_ship(input)
+
+```
+
+
+```{r result1}
+
+input = readLines(here::here("inputs", "input12.txt"))
+input = data.frame(move = as.numeric(gsub("[A-Z]", "", input)),
+                   direction = gsub("[0-9]", "", input))
+
+animation::saveGIF(move_ship(input), "move_ship.gif", interval = 0.2)
+
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+
+
+## Solution
+
+
+```{r solution2}
+
+move_ship2 = function(input, animate = F){
+  
+  x_ship = 0
+  y_ship = 0
+  
+  x = 1
+  y = 10
+  
+  i_max = ifelse(animate, 100, nrow(input))
+  
+  for(i in 1:i_max){
+    
+    move = input$move[i]
+    direction = input$direction[i]
+    
+    if(direction == "R"){
+      
+      new_y = y * cos(-move*pi/180) - x * sin(-move*pi/180)
+      new_x = y * sin(-move*pi/180) + x * cos(-move*pi/180)
+      y = round(new_y)
+      x = round(new_x)
+    }
+    
+    if(direction == "L"){
+      new_y = y * cos(move*pi/180) - x * sin(move*pi/180)
+      new_x = y * sin(move*pi/180) + x * cos(move*pi/180)
+      
+      y = round(new_y)
+      x = round(new_x)
+    }
+    
+    if(direction == "F"){
+      x_ship = x_ship + move * x
+      y_ship = y_ship + move * y
+    }
+    
+    if(direction == "N") x = x + move
+    if(direction == "S") x = x - move
+    if(direction == "E") y = y + move
+    if(direction == "W") y = y - move
+    
+    if(animate){
+      plot(x_ship, y_ship, pch=19, col="green2",
+           ylim=c(-2500, 2500), xlim = c(-2500, 2500),
+           xaxt="n", yaxt="n", xlab="", ylab="")
+      points(x+x_ship, y+y_ship, pch=19, col="red4")
+      text(x_ship, y_ship+1, labels=paste0("Ship x:", x_ship, ", y:", y_ship), pos=3, cex=1)
+      text(x_ship, y_ship-1, labels=paste0("Waypoint x:", x, ", y:", y), pos=1, cex=1)
+    }
+    
+  }
+  
+  abs(x_ship) + abs(y_ship)
+  
+}
+
+```
+
+
+```{r test_solution2}
+
+input = readLines(here::here("inputs", "input12ex.txt"))
+input = data.frame(move = as.numeric(gsub("[A-Z]", "", input)),
+                   direction = gsub("[0-9]", "", input))
+
+move_ship2(input)
+
+```
+
+
+```{r result2}
+
+input = readLines(here::here("inputs", "input12.txt"))
+input = data.frame(move = as.numeric(gsub("[A-Z]", "", input)),
+                   direction = gsub("[0-9]", "", input))
+
+move_ship2(input)
+
+animation::saveGIF(move_ship2(input, animate = T), "move_ship.gif", interval = 0.2)
+
+```
+
