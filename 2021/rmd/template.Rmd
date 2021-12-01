@@ -1,0 +1,74 @@
+---
+title: "Advent of code 2020: day 4"
+author: "Quentin Leclerc"
+date: "04/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+![First part of the challenge.](../img/day4a.jpg)\
+
+
+
+## Solution
+
+
+
+```{r solution1}
+
+
+
+```
+
+
+```{r test_solution1}
+
+
+```
+
+
+```{r result1}
+
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+![Second part of the challenge.](../img/day4b.jpg)\
+
+
+## Solution
+
+
+```{r solution2}
+
+
+```
+
+
+```{r test_solution2}
+
+
+```
+
+
+```{r result2}
+
+
+```
+
