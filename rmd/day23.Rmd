@@ -1,0 +1,104 @@
+---
+title: "Advent of code 2020: day 23"
+author: "Quentin Leclerc"
+date: "04/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+![First part of the challenge.](../img/day4a.jpg)\
+
+
+
+## Solution
+
+
+
+```{r solution1}
+
+for(i in 0:9){
+  
+  mem_length_cups = length(cups)
+  
+  current_cup = i %% length(cups) + 1
+  
+  moved_cups = c(cups, cups)[(current_cup+1):(current_cup+3)]
+  
+  target_cup = cups[current_cup] - 1
+  
+  repeat{
+    if(target_cup %in% moved_cups){
+      target_cup = target_cup - 1
+      next
+    }
+    if(target_cup < min(cups)){
+      target_cup = max(cups)
+      next
+    }
+    break
+  }
+  
+  cups = cups[-which(cups %in% moved_cups)]
+  
+  cups = c(cups[1:which(cups == target_cup)], moved_cups, cups[(which(cups == target_cup)+1):length(cups)])
+  cups = cups[1:mem_length_cups]
+  print(cups)
+}
+
+
+```
+
+
+```{r test_solution1}
+cups = "389125467"
+cups = unlist(strsplit(cups, ""))
+cups = as.numeric(cups)
+
+```
+
+
+```{r result1}
+
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+![Second part of the challenge.](../img/day4b.jpg)\
+
+
+## Solution
+
+
+```{r solution2}
+
+
+```
+
+
+```{r test_solution2}
+
+
+```
+
+
+```{r result2}
+
+
+```
+
