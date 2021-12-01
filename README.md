@@ -1,8 +1,8 @@
-# adventofcode20
+# adventofcode
 
-Repository for my solutions to advent of code 2020 in R !
+Repository for my solutions to advent of code in R !
 
-https://adventofcode.com/2020
+https://adventofcode.com/
 
 Rmarkdown files are in the `rmd` folders.
 
