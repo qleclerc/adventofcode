@@ -49,14 +49,19 @@ That worked! Onto the main solution:
 
 ```{r result1}
 
-input = readLines(here::here("2021", "inputs", "input2.txt"))
+# input = readLines(here::here("2021", "inputs", "input2.txt"))
+# 
+# input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
+#   mutate(X2 = as.numeric(X2)) %>%
+#   group_by(X1) %>%
+#   summarise(sum = sum(X2))
 
-input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
-  mutate(X2 = as.numeric(X2)) %>%
-  group_by(X1) %>%
-  summarise(sum = sum(X2))
+#better way to load the data shown by Alexis:
+input = read.table(here::here("2021", "inputs", "input2.txt")) %>%
+  group_by(V1) %>%
+  summarise(sum = sum(V2))
 
-input = setNames(input$sum, input$X1)
+input = setNames(input$sum, input$V1)
 
 input[["forward"]]*(input[["down"]]-input[["up"]])
 
@@ -117,10 +122,13 @@ Yep this worked for the example, so now we can do it with the main puzzle input:
 
 ```{r result2}
 
-input = readLines(here::here("2021", "inputs", "input2.txt"))
+# input = readLines(here::here("2021", "inputs", "input2.txt"))
+# 
+# input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
+#   mutate(X2 = as.numeric(X2))
 
-input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
-  mutate(X2 = as.numeric(X2))
+#better way to load the data shown by Alexis:
+input = read.table(here::here("2021", "inputs", "input2.txt"))
 
 aim = 0
 horizontal = 0
@@ -128,13 +136,13 @@ depth = 0
 
 for(i in 1:nrow(input)){
   
-  if(input$X1[i] == "up"){
-    aim = aim - input$X2[i]
-  } else if(input$X1[i] == "down"){
-    aim = aim + input$X2[i]
+  if(input$V1[i] == "up"){
+    aim = aim - input$V2[i]
+  } else if(input$V1[i] == "down"){
+    aim = aim + input$V2[i]
   } else {
-    horizontal = horizontal + input$X2[i]
-    depth = depth + aim * input$X2[i]
+    horizontal = horizontal + input$V2[i]
+    depth = depth + aim * input$V2[i]
   }
   
 }
