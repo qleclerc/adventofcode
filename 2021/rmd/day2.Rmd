@@ -1,0 +1,144 @@
+---
+title: "Advent of code 2021: day 2"
+author: "Quentin Leclerc"
+date: "02/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+In this puzzle, we have to interpret a set of instructions telling us how we're moving at each step, and figure out our final position. My immediate reaction was that this would be super straightforward with a loop, but I'm trying to fight my urge to use them this year!
+
+So instead, I realised that we don't actually need to track our position at each step explicitly, we can just sum the values of all our "forward" movements and that will give us our final horizontal position.
+For our final depth, we sum all our "down" movements, substract the sum of all our "up" movements, and we'll have our answer.
+
+## Solution
+
+
+```{r test_solution1}
+
+library(dplyr)
+
+input = c("forward 5",
+          "down 5",
+          "forward 8",
+          "up 3",
+          "down 8",
+          "forward 2")
+
+#bit of reformatting, but I'm sure there's a more elegant way to do this
+input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
+  mutate(X2 = as.numeric(X2)) %>%
+  group_by(X1) %>%
+  summarise(sum = sum(X2))
+
+input = setNames(input$sum, input$X1)
+
+#figuring out final horizontal position * final depth
+input[["forward"]]*(input[["down"]]-input[["up"]])
+
+```
+
+That worked! Onto the main solution:
+
+```{r result1}
+
+input = readLines(here::here("2021", "inputs", "input2.txt"))
+
+input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
+  mutate(X2 = as.numeric(X2)) %>%
+  group_by(X1) %>%
+  summarise(sum = sum(X2))
+
+input = setNames(input$sum, input$X1)
+
+input[["forward"]]*(input[["down"]]-input[["up"]])
+
+
+```
+
+
+
+
+# Part 2
+
+## Challenge
+
+... Okay I give up, now I don't see any way to do this easily aside from using a loop and explicitly tracking our submarine's position at each step.
+
+Here, I'm just checking at each step what the instruction is ("forward", "up", or "down"), and modifying my horizontal position, aim, and depth accordingly, using the corresponding value for that step.
+
+## Solution
+
+
+```{r test_solution2}
+
+input = c("forward 5",
+          "down 5",
+          "forward 8",
+          "up 3",
+          "down 8",
+          "forward 2")
+
+input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
+  mutate(X2 = as.numeric(X2))
+
+#values we're keeping track of throughout the loop
+aim = 0
+horizontal = 0
+depth = 0
+
+for(i in 1:nrow(input)){
+  
+  #if up/down, decrease/increase our aim
+  if(input$X1[i] == "up"){
+    aim = aim - input$X2[i]
+  } else if(input$X1[i] == "down"){
+    aim = aim + input$X2[i]
+  } else {
+    #if forward, increase our horizontal position, and increase our depth based on our current aim
+    horizontal = horizontal + input$X2[i]
+    depth = depth + aim * input$X2[i]
+  }
+  
+}
+
+horizontal * depth
+
+```
+
+Yep this worked for the example, so now we can do it with the main puzzle input:
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input2.txt"))
+
+input = data.frame(matrix(unlist(strsplit(input, " ")), ncol = 2, byrow = T)) %>%
+  mutate(X2 = as.numeric(X2))
+
+aim = 0
+horizontal = 0
+depth = 0
+
+for(i in 1:nrow(input)){
+  
+  if(input$X1[i] == "up"){
+    aim = aim - input$X2[i]
+  } else if(input$X1[i] == "down"){
+    aim = aim + input$X2[i]
+  } else {
+    horizontal = horizontal + input$X2[i]
+    depth = depth + aim * input$X2[i]
+  }
+  
+}
+
+horizontal * depth
+
+```
