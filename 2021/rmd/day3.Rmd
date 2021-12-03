@@ -1,0 +1,165 @@
+---
+title: "Advent of code 2021: day 3"
+author: "Quentin Leclerc"
+date: "03/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/3
+
+Today we're troubleshooting our submarine, and for this we'll have to juggle binary numbers.
+For the first part of the puzzle, we have a list of binary numbers that are all the same length, and we want to summarise this list in just two new binary numbers: one based on which digit (0 or 1) is most common at each position, and one based on which digit is less common at each position.
+
+
+## Solution
+
+We could explictly count the number of 0s and 1s at each position to figure out which is the most/least common, but because we know that the values are either 0 and 1, we can go faster and just use the means. If there are more 1s, then the mean will be between 0.5 and 1, while if there are more 0s then the mean will be between 0 and 0.5. So, we can calculate the mean value for each position, and round to the closest integer, which will be 0 or 1.
+
+Quick trick to use the means method to find the least common value between 0 and 1 instead of the most common: calculate the mean, then do 1 minus that value before rounding.
+
+Eg: if the value are `c(0, 1, 1)` then the mean will be 0.67. Rounding 0.67 to the closest integer gives us 1, so we know that the most common value is 1. To figure out the least common value, we have to round 1 - 0.67 = 0.33, which gives us 0.
+
+```{r test_solution1}
+
+library(dplyr)
+
+#I feel like I'm really not loading this in the most optimal way again...
+input = readLines(here::here("2021", "inputs", "input3ex.txt"))
+rows = length(input)
+
+#some reformatting needed to get a nice matrix, so that we can work out means for each column
+input = paste(input, collapse = "") %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  matrix(., nrow = rows, byrow = T) %>%
+  apply(., c(1,2), as.numeric)
+
+#work out the mean, round, and convert from binary to integer using strtoi()
+strtoi(paste(round(colMeans(input)), collapse = ""), 2) * strtoi(paste(round(1 - colMeans(input)), collapse = ""), 2)
+
+```
+
+Works with the example, so onto the main puzzle input:
+
+```{r result1}
+
+input = readLines(here::here("2021", "inputs", "input3.txt"))
+rows = length(input)
+
+input = paste(input, collapse = "") %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  matrix(., nrow = rows, byrow = T) %>%
+  apply(., c(1,2), as.numeric)
+
+strtoi(paste(round(colMeans(input)), collapse = ""), 2) * strtoi(paste(round(1 - colMeans(input)), collapse = ""), 2)
+
+
+```
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+In this second part, we have to perform iterative filtering, going through each position in the binary sequence and only keeping the binary numbers which have the most/least common value at that position.
+
+
+## Solution
+
+Here I've resorted to a loop again... I keep filtering, moving onto the next column (ie value) each time, until I'm only left with one row.
+
+Note the condition for the oxygen means to be rounded up to 1 if they're equal to 0.5, but for the co2 this has to be rounded down to 0 if it's equal to 0.5. To deal with this, I just add/subtract 0.0001 to the mean, this way if it's initially equal to 0.5 it will shift to 0.5001/0.4999 before being rounded. That does rely on me never actually getting a mean value initially equal to 0.4999/0.5001 though, but that's pretty unlikely...
+
+```{r test_solution2}
+
+input = readLines(here::here("2021", "inputs", "input3ex.txt"))
+rows = length(input)
+
+input = paste(input, collapse = "") %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  matrix(., nrow = rows, byrow = T) %>%
+  apply(., c(1,2), as.numeric)
+
+i = 0
+oxygen = input
+
+while(!is.null(nrow(oxygen))){
+  
+  i = i+1
+  
+  oxygen = oxygen[oxygen[,i] == round(mean(oxygen[,i]) + 0.0001),]
+    
+}
+
+
+i = 0
+co2 = input
+
+while(!is.null(nrow(co2))){
+  
+  i = i+1
+  
+  co2 = co2[co2[,i] == round(1 - mean(co2[,i]) - 0.0001),]
+  
+}
+
+strtoi(paste(oxygen, collapse = ""), 2) * strtoi(paste(co2, collapse = ""), 2)
+
+
+```
+
+All good, now for the main result:
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input3.txt"))
+rows = length(input)
+
+input = paste(input, collapse = "") %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  matrix(., nrow = rows, byrow = T) %>%
+  apply(., c(1,2), as.numeric)
+
+i = 0
+oxygen = input
+
+while(!is.null(nrow(oxygen))){
+  
+  i = i+1
+  
+  oxygen = oxygen[oxygen[,i] == round(mean(oxygen[,i]) + 0.001),]
+    
+}
+
+
+i = 0
+co2 = input
+
+while(!is.null(nrow(co2))){
+  
+  i = i+1
+  
+  co2 = co2[co2[,i] == round(1 - mean(co2[,i]) - 0.001),]
+  
+}
+
+strtoi(paste(oxygen, collapse = ""), 2) * strtoi(paste(co2, collapse = ""), 2)
+
+
+```
+
