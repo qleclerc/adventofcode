@@ -64,24 +64,19 @@ Instead, since the fish internal timers follow fixed patterns (between 0 and 8, 
 
 ```{r result2}
 
-input = readLines(here::here("2021", "inputs", "input6.txt"))
+#updated solution to be cleaner!
 
-input = as.numeric(scan(text = input, what = character(), sep = ","))
+input = as.numeric(scan(here::here("2021", "inputs", "input6.txt"), character(), sep = ","))
 
-optim_input = c(0, as.numeric(table(input)), 0, 0, 0)
+optim_input = c(0, tabulate(input, 8))
 
 for(i in 1:256){
   
-  #"reset" fishes by adding them back to the "7" category (which
-  # will be shifted down to the correct "6" category in the next step)
   optim_input[8] = optim_input[8] + optim_input[1]
-  #shift all the values down by one to indicate the fish timers all decrease by one, and
-  # add new fishes to the "8" category
   optim_input = c(optim_input[-1], optim_input[1])
   
 }
 
-#formatting needed to get the correct number!
 format(sum(optim_input), scientific = F)
 
 
