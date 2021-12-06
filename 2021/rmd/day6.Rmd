@@ -1,0 +1,90 @@
+---
+title: "Advent of code 2021: day 6"
+author: "Quentin Leclerc"
+date: "06/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/6
+
+This was a deceptive challenge (you'll see why in part 2)! Here, we have to keep track of fish that are replicating after their internal timer hits 0.
+
+## Solution
+
+Since each fish has a different internat timer, I went for the laziest possible answer and looped for 80 iterations to create a growing vector. At each step, all the values go down by one. If a value is -1, this means the fish has replicated. I then reset that internal timer back to 6, and append a new fish with an initial timer of 8 at the end of the vector. Very lazy, but surely that won't be a problem, right...?
+
+```{r result1}
+
+#reformat as a vector
+input = readLines(here::here("2021", "inputs", "input6.txt"))
+input = as.numeric(scan(text = input, what = character(), sep = ","))
+
+for(i in 1:80){
+  
+  #decrease all fish internal timers by 1
+  input = input - 1
+  
+  #append new fishes at the end of the vector for each fish which has replicated
+  input = c(input, rep(8, sum(input == -1)))
+  
+  #reset internal timer for fish which just replicated
+  input[input == -1] = 6
+  
+}
+
+length(input)
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+In this second part, we're solving the same problem as above, but for 256 days instead of 80!
+
+## Solution
+
+Well, the lazy option is now impossible, looping over 256 iterations makes me run out of memory...
+
+Instead, since the fish internal timers follow fixed patterns (between 0 and 8, reset to 6, new fish created with a timer of 8), I can just keep track of how many fish in total are in each timer category! Then, at each step, I add as many fish in the "7" category as there currently are in the "0", and shift the entire vector by 1 (nb this "7" category is now "6", so we've effectively reset the fishes which were in "0" to "6"), and add as many fishes in the "8" category as there were in the "0" one.
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input6.txt"))
+
+input = as.numeric(scan(text = input, what = character(), sep = ","))
+
+optim_input = c(0, as.numeric(table(input)), 0, 0, 0)
+
+for(i in 1:256){
+  
+  #"reset" fishes by adding them back to the "7" category (which
+  # will be shifted down to the correct "6" category in the next step)
+  optim_input[8] = optim_input[8] + optim_input[1]
+  #shift all the values down by one to indicate the fish timers all decrease by one, and
+  # add new fishes to the "8" category
+  optim_input = c(optim_input[-1], optim_input[1])
+  
+}
+
+#formatting needed to get the correct number!
+format(sum(optim_input), scientific = F)
+
+
+```
+
+
