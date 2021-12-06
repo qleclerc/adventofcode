@@ -1,0 +1,170 @@
+---
+title: "Advent of code 2021: day 5"
+author: "Quentin Leclerc"
+date: "05/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/5
+
+In this challenge, we have to use coordinates to "draw" lines, and identify how many times lines cross at least once.
+
+
+## Solution
+
+I went for a very explicit approach to solve this problem. Here, I'm creating a matrix of 0s, and at each step I'm "drawing" a line by adding 1 to the values in the matrix which are between the two coordinates for that step.
+
+```{r test_solution1}
+
+#a bit of reformatting to have a matrix of inputs, where each line is the set of coordinates for that step
+input = readLines(here::here("2021", "inputs", "input5ex.txt"))
+input = gsub(" -> ", ",", input)
+input = unlist(strsplit(input, ","))
+input = matrix(as.numeric(input), ncol = 4, byrow = T)
+
+#creating the matrix to store results
+result_grid = matrix(0,
+                     max(c(input[,2], input[,4]))+1,
+                     max(c(input[,1], input[,3]))+1)
+
+#go through each set of coordinates
+for(i in 1:nrow(input)){
+  
+  current_row = input[i,]
+  
+  #only look at vertical or horizontal lines, not all sets of coordinates
+  if(current_row[1] == current_row[3] | current_row[2] == current_row[4]){
+    
+    #note the +1s because R indexing is from 1, not 0
+    result_grid[(current_row[2]+1):(current_row[4]+1), (current_row[1]+1):(current_row[3]+1)] = result_grid[(current_row[2]+1):(current_row[4]+1), (current_row[1]+1):(current_row[3]+1)] + 1
+    
+  }
+  
+}
+
+#points where more than 1 line has been "drawn" will have a value greater than 1
+sum(result_grid > 1)
+
+```
+
+Works with the examples!
+
+```{r result1}
+
+input = readLines(here::here("2021", "inputs", "input5.txt"))
+input = gsub(" -> ", ",", input)
+input = unlist(strsplit(input, ","))
+input = matrix(as.numeric(input), ncol = 4, byrow = T)
+
+result_grid = matrix(0,
+                     max(c(input[,2], input[,4]))+1,
+                     max(c(input[,1], input[,3]))+1)
+
+for(i in 1:nrow(input)){
+  
+  current_row = input[i,]
+  
+  if(current_row[1] == current_row[3] | current_row[2] == current_row[4]){
+    
+    result_grid[(current_row[2]+1):(current_row[4]+1), (current_row[1]+1):(current_row[3]+1)] = result_grid[(current_row[2]+1):(current_row[4]+1), (current_row[1]+1):(current_row[3]+1)] + 1
+    
+  }
+  
+}
+
+sum(result_grid > 1)
+
+
+```
+
+And with the result too!
+
+
+
+
+# Part 2
+
+## Challenge
+
+In this second step, unsurprisingly, we now also include coordinates which draw diagonal lines.
+
+## Solution
+
+Same idea as before, without the `if` statement (since we're looking at all coordinates now), and with a more general calculation for which values to add 1 to based on the beginning and end coordinates. This is using the "absolute" position of values in a matrix, instead of their position by coordinates.
+
+For example, in a 4 by 4 matrix `mat`, the value `mat[2,3]` would be the same as `mat[(2-1)*4+3]`. More generally: for a matrix of `n` columns, `mat[x,y]` is equivalent to `mat[(x-1)*n+y]`.
+
+Because the diagonals are all in steps of 1 (ie 45 degrees), we can use sequences in steps of 1 to move from a starting point to an end point. For example, if I wanted to draw a line from position `[1,3]` to `[4,6]`, the coordinates that this line will pass through will be `[2,4]`, `[3,5]`, and `[4,6]` (+1 every time).
+
+```{r test_result2}
+
+input = readLines(here::here("2021", "inputs", "input5ex.txt"))
+input = gsub(" -> ", ",", input)
+input = unlist(strsplit(input, ","))
+input = matrix(as.numeric(input), ncol = 4, byrow = T)
+
+result_grid = matrix(0,
+                     max(c(input[,2], input[,4]))+1,
+                     max(c(input[,1], input[,3]))+1)
+
+for(i in 1:nrow(input)){
+  
+  current_row = input[i,]
+  
+  start_y = current_row[2]
+  end_y = current_row[4]
+  start_x = current_row[1] + 1
+  end_x = current_row[3] + 1
+  
+  result_grid[c(start_y:end_y * ncol(result_grid))+c(start_x:end_x)] = result_grid[c(start_y:end_y * ncol(result_grid))+c(start_x:end_x)] + 1
+    
+  
+}
+
+sum(result_grid > 1)
+
+
+```
+
+Looks good with the example, so should also work with the actual input:
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input5.txt"))
+input = gsub(" -> ", ",", input)
+input = unlist(strsplit(input, ","))
+input = matrix(as.numeric(input), ncol = 4, byrow = T)
+
+result_grid = matrix(0,
+                     max(c(input[,2], input[,4]))+1,
+                     max(c(input[,1], input[,3]))+1)
+
+#only keep 
+
+for(i in 1:nrow(input)){
+  
+  current_row = input[i,]
+  
+  start_y = current_row[2]
+  end_y = current_row[4]
+  start_x = current_row[1] + 1
+  end_x = current_row[3] + 1
+  
+  result_grid[c(start_y:end_y * ncol(result_grid))+c(start_x:end_x)] = result_grid[c(start_y:end_y * ncol(result_grid))+c(start_x:end_x)] + 1
+    
+  
+}
+
+sum(result_grid > 1)
+
+
+```
+
