@@ -1,0 +1,188 @@
+---
+title: "Advent of code 2020: day 4"
+author: "Quentin Leclerc"
+date: "04/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/4
+
+In this puzzle, we have a set of grids, and we go through a list of numbers, each time "marking" the numbers on the grids, until one grid has a bingo (one full row or column of numbers marked.)
+
+
+## Solution
+
+The first step was to decide how to "mark" numbers, and check for a bingo. I chose to replace matching values by -1 in the grid. This way, a bingo would show up as a column or row sum of -5 (since the grids are 5*5).
+Thinking about the best way to go through the grids until we find a bingo, I decided to reformat my puzzle input as a list of dataframes (each dataframe being a grid). Then, I can use `lapply()` and some custom function to replace values and check for a bingo at each step.
+
+Full disclaimer: I struggled a fair bit to get this to work, so trying out with the example input was essential here!
+
+```{r test_solution1}
+
+#extract the bingo values
+bingo_vals = readLines(here::here("2021", "inputs", "input4ex.txt"))[1]
+bingo_vals = as.numeric(unlist(strsplit(bingo_vals, ",")))
+
+#extract the grids
+input = read.table(here::here("2021", "inputs", "input4ex.txt"),skip = 1)
+
+#group input into 5*5 grids in list
+bingo_grids = list()
+j = 0
+
+for(i in seq(1, nrow(input), 5)){
+  j = j + 1
+  bingo_grids[[j]] = input[i:(i+4),]
+}
+
+#function to check if a bingo happened
+check_sums = function(x){
+  
+  c_sums = (colSums(x)==-5)
+  r_sums = (rowSums(x)==-5)
+  
+  any(c_sums, r_sums)
+  
+}
+
+#function to replace values in grids by -1 if they match the bingo value
+replace_values = function(x, value){
+  x[x==value] = -1
+  return(x)
+}
+
+i = 0
+
+#repeat until we get a bingo
+repeat{
+  
+  i = i+1
+  test_val = bingo_vals[i]
+  
+  bingo_grids = lapply(bingo_grids, replace_values, value = test_val)
+  
+  bingo = unlist(lapply(bingo_grids, check_sums))
+
+  #as soon as we get a bingo, extract which grid won, and break
+  if(any(bingo == TRUE)){
+    good_grid = bingo_grids[[which(bingo == TRUE)]]
+    break
+  }
+  
+}
+
+#sum all values which weren't matched (ie not equal to -1), and multiply by last bingo value
+sum(good_grid[good_grid != -1]) * test_val
+
+```
+
+Okay, let's use the main input now:
+
+```{r result1}
+
+bingo_vals = readLines(here::here("2021", "inputs", "input4.txt"))[1]
+bingo_vals = as.numeric(unlist(strsplit(bingo_vals, ",")))
+
+input = read.table(here::here("2021", "inputs", "input4.txt"),skip = 1)
+
+bingo_grids = list()
+j = 0
+
+for(i in seq(1, nrow(input), 5)){
+  j = j + 1
+  bingo_grids[[j]] = input[i:(i+4),]
+}
+
+i = 0
+
+repeat{
+  
+  i = i+1
+  test_val = bingo_vals[i]
+  
+  bingo_grids = lapply(bingo_grids, replace_values, value = test_val)
+  
+  bingo = unlist(lapply(bingo_grids, check_sums))
+
+  if(any(bingo == TRUE)){
+    good_grid = bingo_grids[[which(bingo == TRUE)]]
+    break
+  }
+  
+}
+
+sum(good_grid[good_grid != -1]) * test_val
+
+
+```
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+In this second part, instead of being interested in the first grid to win, we want to find the last one.
+
+## Solution
+
+This is a relatively easy second part thanks to the structure we've chosen to solve part 1, we just need to change the break condition to wait until all grids have a bingo (ie a column or row sum of 1). I added an extra `if` statement to catch the last grid to still not have a bingo.
+
+Since this is straightforward, I used the main puzzle input directly:
+
+```{r result2}
+
+bingo_vals = readLines(here::here("2021", "inputs", "input4.txt"))[1]
+bingo_vals = as.numeric(unlist(strsplit(bingo_vals, ",")))
+
+input = read.table(here::here("2021", "inputs", "input4.txt"),skip = 1)
+
+bingo_grids = list()
+j = 0
+
+for(i in seq(1, nrow(input), 5)){
+  j = j + 1
+  bingo_grids[[j]] = input[i:(i+4),]
+}
+
+i = 0
+
+repeat{
+  
+  i = i+1
+  test_val = bingo_vals[i]
+  
+  bingo_grids = lapply(bingo_grids, replace_values, value = test_val)
+  
+  bingo = unlist(lapply(bingo_grids, check_sums))
+
+  #extra if statement to catch which grid is the last one to win
+  if(sum(bingo == FALSE) == 1){
+    good_grid = which(bingo == FALSE)
+  }
+  
+  #break when all the grids won
+  if(all(bingo == TRUE)){
+    good_grid = bingo_grids[[good_grid]]
+    break
+  }
+
+  
+}
+
+sum(good_grid[good_grid != -1]) * test_val
+
+
+```
+
+Yay!
