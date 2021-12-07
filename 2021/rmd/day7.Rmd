@@ -1,0 +1,63 @@
+---
+title: "Advent of code 2021: day 7"
+author: "Quentin Leclerc"
+date: "07/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/7
+
+In today's puzzle, we're trying to align a bunch of crabs in the most optimal way (ie with the least amount of movement possible).
+
+
+## Solution
+
+In this first part, we want to figure out what the "optimal" position is to align the crabs, and how much fuel this will cost us. This optimal position must be the one where the total movement required for the entire crab population is minimal. In this case, the optimal position is simply the median position of all the crabs.
+
+
+```{r test_solution1}
+
+input = scan(here::here("2021", "inputs", "input7.txt"), numeric(), sep = ",")
+
+sum(abs(input - median(input)))
+
+```
+
+
+
+
+# Part 2
+
+## Challenge
+
+In this second part, the calculation of the fuel cost is a bit more complicated. It's no longer just `abs(target_position - current_position)`, now the fuel cost increases for each movement (first movement costs 1, second costs 2 etc...). 
+
+## Solution
+
+Since this problem is still about optimisation, then it's time to use the `optim()` function in `R`! Here, we have to understand that the fuel cost to move from a current position to a target position is `sum(0:abs(current_position - target_position))` (since the cost increases by 1 per step). We then write a function which calculates the fuel cost for each crab for a given target position (using `sapply()`). Finally, we use the `optim()` function to calculate the target position which minimises the total fuel cost.
+
+Note we have to rerun the `fuel_cost()` at the end because `optim()` will not return an integer for the most optimal position, so we have to calculate the fuel cost using the rounded optimal value.
+
+```{r test_solution2}
+
+input = scan(here::here("2021", "inputs", "input7.txt"), numeric(), sep = ",")
+
+fuel_cost = function(target_pos, input){
+  
+  sum(sapply(input, function(x) sum(0:abs(x-target_pos))))
+  
+}
+
+fuel_cost(round(optimise(fuel_cost, c(1, max(input)), input)$minimum), input)
+
+
+```
+

@@ -1,7 +1,7 @@
 ---
-title: "Advent of code 2020: day 4"
+title: "Advent of code 2021: day 4"
 author: "Quentin Leclerc"
-date: "04/12/2020"
+date: "04/12/2021"
 output: html_document
 ---
 
@@ -13,19 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Challenge
 
-![First part of the challenge.](../img/day4a.jpg)\
-
 
 
 ## Solution
 
-
-
-```{r solution1}
-
-
-
-```
 
 
 ```{r test_solution1}
@@ -49,16 +40,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Challenge
 
-![Second part of the challenge.](../img/day4b.jpg)\
 
 
 ## Solution
-
-
-```{r solution2}
-
-
-```
 
 
 ```{r test_solution2}
