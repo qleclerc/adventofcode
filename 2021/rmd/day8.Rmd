@@ -47,6 +47,7 @@ Alright, time to grab a pen and paper now, we have to decode every single digit 
 ## Solution
 
 Based on what the numbers "look like" on a seven-digit display, I came up with the following set of rules that I apply one by one to eventually figure out what each signal pattern corresponds to:
+
 - the pattern with 2 letters is 1
 - the pattern with 4 letters is 4
 - the pattern with 3 letters is 7
