@@ -1,0 +1,209 @@
+---
+title: "Advent of code 2021: day 8"
+author: "Quentin Leclerc"
+date: "08/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/8
+
+Today's solution boils down to decoding an input using some basic clues to get us starting, then using aready decoded inputs as we go to figure out all of them one by one.
+
+## Solution
+
+For the first step, we're only interested in the easy digits which we can identify immediately because they're unique: 1 (which will contain 2 letters), 4 (4 letters), 7 (3 letters) and 8 (7 letters). All that's needed here is a bit of reformatting to only keep the part of the input we're interested in, then using `tabulate()` to count how many times each digit occurs.
+
+```{r test_solution1}
+
+library(dplyr)
+
+input = readLines(here::here("2021", "inputs", "input8.txt")) %>%
+  gsub(".*\\| ", "", .) %>%
+  strsplit(. , " ") %>%
+  unlist(.)
+
+sum(tabulate(nchar(input), 7)[c(2, 3, 4, 7)])
+
+```
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+Alright, time to grab a pen and paper now, we have to decode every single digit for each line, and I don't think there's a clever maths trick to solve this, it's just pure logic...
+
+## Solution
+
+Based on what the numbers "look like" on a seven-digit display, I came up with the following set of rules that I apply one by one to eventually figure out what each signal pattern corresponds to:
+- the pattern with 2 letters is 1
+- the pattern with 4 letters is 4
+- the pattern with 3 letters is 7
+- the pattern with 7 letters is 8
+- the pattern which contains 6 letters and NOT all of the letters of the pattern for 1 is 6
+- the pattern which contains 5 letters and all of the letters of the pattern for 1 is 3
+- the pattern which contains 6 letters and all of the letters of the pattern for 3 is 9
+- the pattern which contains 6 letters and hasn't already been identified is 0
+- the pattern which contains 5 letters and whose letters are all contained in the pattern for 9 and hasn't already been identified is 5
+- the pattern which contains 5 letters and hasn't already been identified is 2
+
+Then, just need to realign the output values with the decoded values to convert these to numbers.
+
+Let's first check if this works with the example:
+
+```{r test_solution2}
+
+input = readLines(here::here("2021", "inputs", "input8ex.txt"))
+
+#value to store the sum of decoded outputs as we go
+result = 0
+
+#custom function to check if a pattern contains all the letters in another pattern
+match_letters = function(pattern, letters){
+  
+  all(sapply(unlist(strsplit(letters, "")), function(x) grepl(x, pattern)))
+  
+}
+
+
+for(i in input){
+  
+  #vector to store the decoded patterns
+  decode = rep(0, 10)
+  
+  #extract encoded patterns
+  patterns = i %>%
+    gsub(" \\|.*", "", .) %>%
+    strsplit(. , " ") %>%
+    unlist(.)
+  
+  #extract encoded output
+  output = i %>%
+    gsub(".*\\| ", "", .) %>%
+    strsplit(. , " ") %>%
+    unlist(.)
+  
+  #which pattern is 1
+  decode[2] = patterns[nchar(patterns) == 2]
+  #which pattern is 4
+  decode[5] = patterns[nchar(patterns) == 4]
+  #which pattern is 7
+  decode[8] = patterns[nchar(patterns) == 3]
+  #which pattern is 8
+  decode[9] = patterns[nchar(patterns) == 7]
+  
+  #which pattern is 6
+  decode[7] = patterns[nchar(patterns) == 6 & !sapply(patterns, match_letters, letters = decode[2])]
+  
+  #which pattern is 3
+  decode[4] = patterns[nchar(patterns) == 5 & sapply(patterns, match_letters, letters = decode[2])]
+  
+  #which pattern is 9
+  decode[10] = patterns[nchar(patterns) == 6 & sapply(patterns, match_letters, letters = decode[4])]
+  
+  #which pattern is 0
+  decode[1] = patterns[nchar(patterns) == 6 & !(patterns %in% decode)]
+  
+  #which pattern is 5
+  decode[6] = patterns[nchar(patterns) == 5 &
+                         sapply(patterns, function(x) match_letters(decode[10], x)) &
+                         !(patterns %in% decode)]
+  
+  #which pattern is 2
+  decode[3] = patterns[!(patterns %in% decode)]
+  
+  #decode the outputs
+  output[1] = decode[nchar(decode) == nchar(output[1]) & sapply(decode, match_letters, letters = output[1])]
+  output[2] = decode[nchar(decode) == nchar(output[2]) & sapply(decode, match_letters, letters = output[2])]
+  output[3] = decode[nchar(decode) == nchar(output[3]) & sapply(decode, match_letters, letters = output[3])]
+  output[4] = decode[nchar(decode) == nchar(output[4]) & sapply(decode, match_letters, letters = output[4])]
+  
+  #convert outputs to numbers
+  output = sapply(output, function(x) which(decode == x)-1) %>%
+    paste0(., collapse = "") %>%
+    as.numeric(.)
+  
+  #add decoded output value
+  result = result + output
+  
+}
+
+result
+
+```
+
+And now with the main puzzle input:
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input8.txt"))
+
+result = 0
+
+match_letters = function(pattern, letters){
+  
+  all(sapply(unlist(strsplit(letters, "")), function(x) grepl(x, pattern)))
+  
+}
+
+for(i in input){
+  
+  decode = rep(0, 10)
+  
+  patterns = i %>%
+    gsub(" \\|.*", "", .) %>%
+    strsplit(. , " ") %>%
+    unlist(.)
+  
+  output = i %>%
+    gsub(".*\\| ", "", .) %>%
+    strsplit(. , " ") %>%
+    unlist(.)
+  
+  decode[2] = patterns[nchar(patterns) == 2]
+  decode[5] = patterns[nchar(patterns) == 4]
+  decode[8] = patterns[nchar(patterns) == 3]
+  decode[9] = patterns[nchar(patterns) == 7]
+  
+  decode[7] = patterns[nchar(patterns) == 6 & !sapply(patterns, match_letters, letters = decode[2])]
+  
+  decode[4] = patterns[nchar(patterns) == 5 & sapply(patterns, match_letters, letters = decode[2])]
+  
+  decode[10] = patterns[nchar(patterns) == 6 & sapply(patterns, match_letters, letters = decode[4])]
+  
+  decode[1] = patterns[nchar(patterns) == 6 & !(patterns %in% decode)]
+  
+  decode[6] = patterns[nchar(patterns) == 5 &
+                         sapply(patterns, function(x) match_letters(decode[10], x)) &
+                         !(patterns %in% decode)]
+  
+  decode[3] = patterns[!(patterns %in% decode)]
+  
+  output[1] = decode[nchar(decode) == nchar(output[1]) & sapply(decode, match_letters, letters = output[1])]
+  output[2] = decode[nchar(decode) == nchar(output[2]) & sapply(decode, match_letters, letters = output[2])]
+  output[3] = decode[nchar(decode) == nchar(output[3]) & sapply(decode, match_letters, letters = output[3])]
+  output[4] = decode[nchar(decode) == nchar(output[4]) & sapply(decode, match_letters, letters = output[4])]
+  
+  output = sapply(output, function(x) which(decode == x)-1) %>%
+    paste0(., collapse = "") %>%
+    as.numeric(.)
+  
+  result = result + output
+  
+}
+
+result
+
+```
+

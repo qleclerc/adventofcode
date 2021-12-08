@@ -59,5 +59,10 @@ fuel_cost = function(target_pos, input){
 fuel_cost(round(optimise(fuel_cost, c(1, max(input)), input)$minimum), input)
 
 
+#massively clever solution that I don't understand (why the mean??):
+sum(sapply(input, function(x) sum(0:abs(x-floor(mean(input))))))
+
+
+
 ```
 
