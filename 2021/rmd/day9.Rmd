@@ -1,0 +1,178 @@
+---
+title: "Advent of code 2021: day 9"
+author: "Quentin Leclerc"
+date: "09/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/9
+
+In today's puzzle, we are trying to find low points in a matrix (ie values which are small than all their neighbours).
+
+## Solution
+
+To solve this first section, I worked out the difference between a value and each of its four neighbours using matrices. Then, I only keep the values which always have a negative difference with their neighbours (ie which are always smaller than their neighbours).
+
+```{r test_solution1}
+
+library(dplyr)
+
+#a bit of reformatting to get a nice matrix
+input = readLines(here::here("2021", "inputs", "input9.txt")) %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(., nrow = sqrt(length(.)), byrow = T)
+
+#difference between values and their right neighbour
+grid_1 = input - cbind(input[,-1], 10)
+#difference between values and their left neighbour
+grid_2 = input - cbind(10, input[,-ncol(input)])
+#difference between values and their bottom neighbour
+grid_3 = input - rbind(input[-1,], 10)
+#difference between values and their top neighbour
+grid_4 = input - rbind(10, input[-nrow(input),])
+
+#figure out which inputs are smaller than all their neighbours, add 1, and sum
+sum(input[intersect(which(grid_1<0), intersect(which(grid_2<0), intersect(which(grid_3<0), which(grid_4<0))))]+1)
+
+```
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+Not gonna lie: this is messy. Here, we have to figure out basin sizes, ie the area around a low point which is surrounded by 9s (the maximum value).
+
+## Solution
+
+This is not a clean solution! Here, I'm using the fact that each low point belongs to one unique basin. I then loop over these low points, check their neighbours, and store these neighbours if they are not equal to 9 (ie they are part of the same basin). I then repeat this process to check the neighbours of these neighbours etc... until I see no difference between two steps, which tells me that I've identified all values which are part of the same basin.
+
+Had to fine tune this quite a lot so using the example input was essential:
+
+```{r test_solution2}
+
+input = readLines(here::here("2021", "inputs", "input9ex.txt")) %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(., ncol = 10, byrow = T)
+
+#"surround" the input in 9s to make my life easier
+input = cbind(9, input, 9)
+input = rbind(9, input, 9)
+
+grid_1 = input - cbind(input[,-1], 10)
+grid_2 = input - cbind(10, input[,-ncol(input)])
+grid_3 = input - rbind(input[-1,], 10)
+grid_4 = input - rbind(10, input[-nrow(input),])
+
+#work out which values are low points
+low_points = intersect(which(grid_1<0), intersect(which(grid_2<0), intersect(which(grid_3<0), which(grid_4<0))))
+
+basin_sizes = low_points
+
+#replace all non-maximum values by 0 to make my life easier
+input[input < 9] = 0
+
+#loop through all low points
+for(i in low_points){
+  
+  old_basin = c(0,0)
+  new_basin = i
+  
+  #keep going until I've identified all values in the same basin
+  while(length(new_basin) != length(old_basin)){
+    
+    old_basin = new_basin
+
+    #go through all the values I have already identified as being part of the basin
+    #not efficient!! Means I'm checking values multiple times
+    for(j in old_basin){
+      
+      #extract all neighbours of that value
+      surrounding_basin = c(j-1, j+1, j-nrow(input), j+nrow(input))
+      #only keep neightbours that are part of the basin (ie not 9s)
+      new_basin = c(new_basin, surrounding_basin[input[surrounding_basin] == 0])
+      
+    }
+    
+    #clean to remove duplicate values
+    new_basin = unique(new_basin)
+    
+  }
+  
+  #store basin size for that low point
+  basin_sizes[low_points == i] = length(new_basin)
+  
+}
+
+prod(tail(sort(basin_sizes), 3))
+
+```
+
+Now it works, let's use the main input:
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input9.txt")) %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(., ncol = 100, byrow = T)
+
+input = cbind(9, input, 9)
+input = rbind(9, input, 9)
+
+grid_1 = input - cbind(input[,-1], 10)
+grid_2 = input - cbind(10, input[,-ncol(input)])
+grid_3 = input - rbind(input[-1,], 10)
+grid_4 = input - rbind(10, input[-nrow(input),])
+
+low_points = intersect(which(grid_1<0), intersect(which(grid_2<0), intersect(which(grid_3<0), which(grid_4<0))))
+
+basin_sizes = low_points
+
+input[input < 9] = 0
+
+for(i in low_points){
+  
+  old_basin = c(0,0)
+  new_basin = i
+  
+  while(length(new_basin) != length(old_basin)){
+    
+    old_basin = new_basin
+
+    for(j in old_basin){
+      
+      surrounding_basin = c(j-1, j+1, j-nrow(input), j+nrow(input))
+      new_basin = c(new_basin, surrounding_basin[input[surrounding_basin] == 0])
+      
+    }
+    
+    new_basin = unique(new_basin)
+    
+  }
+  
+  basin_sizes[low_points == i] = length(new_basin)
+  
+}
+
+prod(tail(sort(basin_sizes), 3))
+
+```
+
