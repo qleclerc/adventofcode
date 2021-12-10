@@ -1,0 +1,139 @@
+---
+title: "Advent of code 2021: day 4"
+author: "Quentin Leclerc"
+date: "04/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/10
+
+Today's problem is text based: we have to go through a sequence, analyse pairs of matching characters, and flag when an unexpected pair appears.
+
+## Solution
+
+Nothing elegant here, I'm just going through each line in the input. Then, for each value in that line, if it's an opening character `(, [, { or <` I record that I should find a corresponding closing character `), ], } or >` at some point. If it's a closing character, I check if it matches the last closing character I recorded (ie the one I would expect to see here, as it would close the last segment which has been most recently opened). If it matches, then I remove the last character in my vector of closing characters that I expect to see (as this segment is now closed).
+
+However, if the characters do not match, that means that I have an illegal character! I exit the loop and record this character to calculate the score at the end, and move on to the next line in the input.
+
+
+```{r result1}
+
+input = readLines(here::here("2021", "inputs", "input10.txt"))
+
+illegals = c()
+
+#go through each input line
+for(i in input){
+  
+  #split into characters
+  input_i = unlist(strsplit(i, ""))
+  #vector to store the closing characters I'm expecting to see
+  expected = c()
+  
+  #go through each character
+  for(j in input_i){
+    
+    #if it's an opening character, record that I'll need to see the corresponding closing one later
+    if(j == "(") expected = c(expected, ")")
+    if(j == "[") expected = c(expected, "]")
+    if(j == "{") expected = c(expected, "}")
+    if(j == "<") expected = c(expected, ">")
+    
+    #if it's a closing character...
+    if(j %in% c(")","]","}",">")){
+      #... and matches what I'm expecting to see, I remove it from the "expected" vector since the segment is closed
+      if(j == tail(expected, 1)){
+        expected = expected[-length(expected)]
+      } else {
+        #otherwise, exit the loop and record that it is an illegal character
+        illegals = c(illegals, j)
+        break
+      }
+    }
+  }
+}
+
+#calculate the final score
+illegals = table(illegals)
+illegals[")"]*3 + illegals["]"]*57 + illegals["}"]*1197 + illegals[">"]*25137
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+In this second part, we're interested in lines that don't have an illegal character, but that are simply not finished (ie missing one or more closing characters). Our aim is to list these closing characters to calculate a score.
+
+## Solution
+
+I've just adapted the solution above to skip lines which are illegal (using the `illegal = T` trigger). If the line isn't illegal, then it is incomplete. I then make use of the `expected` vector which recorded all the closing characters I'm still expecting to see.
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input10.txt"))
+
+all_scores = c()
+
+for(i in 1:length(input)){
+  
+  input_i = unlist(strsplit(input[i], ""))
+  expected = c()
+  #trigger to skip lines with illegal characters
+  illegal = F
+  
+  for(j in input_i){
+    
+    if(j == "(") expected = c(expected, ")")
+    if(j == "[") expected = c(expected, "]")
+    if(j == "{") expected = c(expected, "}")
+    if(j == "<") expected = c(expected, ">")
+    
+    if(j %in% c(")","]","}",">")){
+      if(j == tail(expected, 1)){
+        expected = expected[-length(expected)]
+      } else {
+        illegal = T
+        break
+      }
+    }
+  }
+  
+  if(illegal) next
+  
+  #if we're still here, then the line is incomplete
+  #the "expected" vector tells us what's missing!
+  expected = rev(expected)
+  score = 0
+  
+  #calculate the score for this line
+  for(k in expected){
+    score = score*5
+    if(k == ")") score = score + 1
+    if(k == "]") score = score + 2
+    if(k == "}") score = score + 3
+    if(k == ">") score = score + 4
+  }
+  
+  all_scores = c(all_scores, score)
+  
+}
+
+median(all_scores)
+
+```
+
