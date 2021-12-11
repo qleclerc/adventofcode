@@ -1,0 +1,149 @@
+---
+title: "Advent of code 2021: day 11"
+author: "Quentin Leclerc"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/11
+
+In today's puzzle, we're mixing a bit of of day 6 and day 9! We have a grid of octopuses, each with an energy level, and at each step we have to increase their energy. If their energy is greater than 9, they flash, which resets them to 0 and increases the energy level of all the octopuses around them by 1.
+
+## Solution
+
+To solve this, I'm applying a similar approach as for day 6 part 1, which is to work with matrices. At each step, I first increase all the values by 1. Then, I identify all positions where the value is greater than 9 (indicating that the octopus is ready to flash). I create a new matrix where the values at these positions are all 1, and 0 everywhere else. I then shift this matrix up/down/left/right/up-right/up-left/down-right/down-left, and each time I add this shifted matrix to the matrix containing my octopus values. This is equivalent to me adding 1 to all the octopuses which were next to an octopus which just flashed!
+
+For the "flashing" step, I repeat this until there are no more octopuses with an energy level greater than 9. Note that to account for the fact that an octopus can only flash once per generation, I make the values of octopuses which just flashed negative. This way, I can ignore them in the repeats, because they will never be able to again reach an energy level greater than 9 during that generation.
+
+```{r result1}
+
+library(dplyr)
+
+#a bit of reformatting to get a nice matrix input
+input = scan(here::here("2021", "inputs", "input11.txt"), character()) %>%
+  paste(., collapse = "") %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(., nrow = 10, byrow = T)
+
+#value to store the number of flashes
+n_flashes = 0
+
+#repeat for 100 generations
+for(i in 1:100){
+  
+  #increase all energy levels by 1
+  input = input + 1
+  
+  #repeat while there are energy levels greater than 9 (ie octopuses ready to flash)
+  while(any(input > 9)){
+    
+    #create a flash matrix with 1s where octopuses are flashing, 0 elsewhere
+    flash_matrix = input 
+    flash_matrix[flash_matrix <= 9] = 0
+    flash_matrix[flash_matrix > 9] = 1
+    
+    #keep track of number of flashes
+    n_flashes = n_flashes + sum(flash_matrix)
+    
+    #make energy level of octopuses which just flashed negative
+    input = input - 100*flash_matrix
+    
+    #add 1 to neighbouring octopuses
+    input = input + cbind(flash_matrix[,-1], 0) #left
+    input = input + cbind(0, flash_matrix[,-10]) #right
+    
+    input = input + rbind(flash_matrix[-1,], 0) #up
+    input = input + rbind(0, flash_matrix[-10,]) #down
+    
+    input = input + rbind(cbind(flash_matrix[-1,-1], 0), 0) #top-left
+    input = input + rbind(0, cbind(0, flash_matrix[-10,-10])) #bottom-right
+    
+    input = input + rbind(cbind(0, flash_matrix[-1,-10]), 0) #top-right
+    input = input + rbind(0, cbind(flash_matrix[-10,-1], 0)) #bottom-left
+    
+  }
+  
+  #reset energy levels to 0 for all octopuses which flashed
+  input[input<0] = 0
+  
+}
+
+n_flashes
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+Now, we want to stop as soon as all octopuses have just flashed at the same step.
+
+## Solution
+
+Because of how I implemented part 1, part 2 is easy! I just exit the loop when all energy levels are equal to 0.
+
+```{r result2}
+
+input = scan(here::here("2021", "inputs", "input11.txt"), character()) %>%
+  paste(., collapse = "") %>%
+  strsplit(., "") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(., nrow = 10, byrow = T)
+
+i = 0
+
+repeat{
+  
+  i = i + 1
+  input = input + 1
+  
+  while(any(input > 9)){
+    
+    flash_matrix = input 
+    flash_matrix[flash_matrix <= 9] = 0
+    flash_matrix[flash_matrix > 9] = 1
+    
+    input = input - 100*flash_matrix
+    
+    input = input + cbind(flash_matrix[,-1], 0)
+    input = input + cbind(0, flash_matrix[,-10])
+    input = input + rbind(flash_matrix[-1,], 0)
+    input = input + rbind(0, flash_matrix[-10,])
+    
+    input = input + rbind(cbind(flash_matrix[-1,-1], 0), 0)
+    input = input + rbind(0, cbind(0, flash_matrix[-10,-10]))
+    
+    input = input + rbind(cbind(0, flash_matrix[-1,-10]), 0)
+    input = input + rbind(0, cbind(flash_matrix[-10,-1], 0))
+    
+  }
+  
+  input[input<0] = 0
+
+  #stop as soon as all energy levels are 0 (ie all octopuses just flashed)
+  if(all(input==0)) break
+  
+}
+
+i
+
+
+```
+
