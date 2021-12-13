@@ -1,0 +1,158 @@
+---
+title: "Advent of code 2021: day 13"
+author: "Quentin Leclerc"
+date: "13/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/13
+
+In today's challenge, we have to "fold" a piece of paper. Part 1 just asks us to fold it once, and part 2 to fold it multiple times, so my solution to part a is directly applicable to part 2.
+
+## Solution
+
+The first challenge is how to work with the input. I've chosen to represent the paper as a matrix, with 0s indicating a blank space, and 1 indicating a dot. Then, to "fold" the paper, I'm splitting the matrix along the fold line, and adding up the values on one side with a flipped version of the other side. I can then just replace values greater than 1 by 1 to keep the output.
+
+Since I knew part 2 was going to ask me to fold it multiple times, I already implemented the folding as a loop here, even though it's technically not needed.
+
+```{r test_solution1}
+
+library(dplyr)
+
+input = readLines(here::here("2021", "inputs", "input13.txt"))
+
+#separate fold instructions from initial coordinates of dots
+input_fold = input[-c(1:which(input == ""))]
+input = input[-c(which(input == ""):length(input))]
+
+#reformat the input to have a nice dataset of dots coordinates
+input = strsplit(input, ",") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(. , ncol = 2, byrow = T)
+
+#create our "sheet of paper", with 1s indicating dots and 0s blank spaces
+paper = matrix(0, nrow = max(input[,2]+1), ncol = max(input[,1]+1))
+
+#fill in the dots based on the coordinates
+for(i in 1:nrow(input)){
+  
+  paper[input[i,2]+1, input[i,1]+1] = 1
+  
+}
+
+#apply fold instructions
+for(i in input_fold[1]){
+  
+  #check if we're folding along the x (columns) or y (rows) axis
+  if(grepl("x", i)){
+    
+    #extract fold position
+    #(I know this is technically unnecessary and I could just fold along the middle point but meh)
+    i = as.numeric(gsub(".*=", "", i))+1
+    
+    #extract the first half of the matrix
+    new_paper = paper[,c(1:i-1)]
+    
+    #reverse the second half, and add the values to the first half
+    new_paper = new_paper + paper[,c(ncol(paper):(i+1))]
+    
+  } else {
+    
+    #same logic as above, but splitting by row instead of column
+    
+    i = as.numeric(gsub(".*=", "", i)) + 1
+
+    new_paper = paper[c(1:i-1),]
+    
+    new_paper = new_paper + paper[c(nrow(paper):(i+1)),]
+
+  }
+  
+  #update paper
+  paper = new_paper
+  #clean paper, as multiple overlapping dots (>1) are just equivalent to one dot (1)
+  paper[paper > 1] = 1
+  
+}
+
+#how many dots in total?
+sum(paper)
+
+```
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+As mentioned, in this second bit we just need to repeat the folding multiple times...
+
+## Solution
+
+So, my solution here is the same as above, but I noticed a glitch. I had assumed that the number of rows/columns would be the same as the maximum coordinates in my input, but that's not true! There's an extra empty row in my data... So I just manually added it here.
+
+Also note that the patterns of 0s and 1s on our final paper display capital letters, and that those capital letters are our puzzle answer. To be honest, I can't be bothered to figure out how to code something to automatically translate this into letters, so I just opened it up, looked at it, and figured out myself what the letters were :)
+
+```{r result2}
+
+input = readLines(here::here("2021", "inputs", "input13.txt"))
+
+input_fold = input[-c(1:which(input == ""))]
+input = input[-c(which(input == ""):length(input))]
+
+input = strsplit(input, ",") %>%
+  unlist(.) %>%
+  as.numeric(.) %>%
+  matrix(. , ncol = 2, byrow = T)
+
+#well, I only knew after trial an error that there had to be an extra blank row in the matrix...
+paper = matrix(0, nrow = max(input[,2])+2, ncol = max(input[,1])+1)
+
+for(i in 1:nrow(input)){
+  
+  paper[(input[i,2]+1), (input[i,1]+1)] = 1
+  
+}
+
+for(i in input_fold){
+  
+  if(grepl("x", i)){
+    
+    i = as.numeric(gsub(".*=", "", i))+1
+    
+    new_paper = paper[,c(1:i-1)]
+    
+    new_paper = new_paper + paper[,c(ncol(paper):(i+1))]
+    
+  } else {
+    
+    i = as.numeric(gsub(".*=", "", i)) + 1
+
+    new_paper = paper[c(1:i-1),]
+    
+    new_paper = new_paper + paper[c(nrow(paper):(i+1)),]
+
+  }
+  
+  paper = new_paper
+  paper[paper > 1] = 1
+  
+}
+
+#figure out what the letters are myself
+View(paper)
+
+```
+
