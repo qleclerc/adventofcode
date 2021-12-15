@@ -1,0 +1,119 @@
+---
+title: "Advent of code 2021: day 14"
+author: "Quentin Leclerc"
+date: "14/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+
+
+## Solution
+
+
+
+```{r test_solution1}
+
+rules = scan(here::here("2021", "inputs", "input14.txt"), character(), sep = "-", skip = 2)
+rules = gsub(" ", "", rules)
+rules = gsub(">", "", rules)
+rules = matrix(rules, ncol = 2, byrow = T)
+
+input = readLines(here::here("2021", "inputs", "input14.txt"))[1]
+
+for(i in 1:10){
+  
+  split_input = mapply(function(x, y){substr(input, x, y)}, x=1:(nchar(input)-1), y=2:nchar(input))
+  
+  for(j in 1:length(split_input)){
+    
+    if(split_input[j] %in% rules[,1]){
+      split_input[j] = gsub('^(.{1})(.*)$', paste0("\\1", rules[rules[,1]==split_input[j],2],"\\2"), split_input[j])
+    }
+    
+    if(j != length(split_input)) split_input[j] = gsub('.$', '', split_input[j])
+    
+  }
+  
+  input = paste0(split_input, collapse = "")
+  
+}
+
+input = unlist(strsplit(input, ""))
+max(table(input)) - min(table(input))
+
+```
+
+
+
+
+# Part 2
+
+## Challenge
+
+
+
+## Solution
+
+
+```{r result2}
+
+rules = scan(here::here("2021", "inputs", "input14.txt"), character(), sep = "-", skip = 2)
+rules = gsub(" ", "", rules)
+rules = gsub(">", "", rules)
+rules = matrix(rules, ncol = 2, byrow = T)
+
+input = readLines(here::here("2021", "inputs", "input14.txt"))[1]
+input = mapply(function(x, y){substr(input, x, y)}, x=1:(nchar(input)-1), y=2:nchar(input))
+
+input = table(input)
+
+for(i in 1:10){
+  
+  new_input = input
+  
+  for(j in names(input)){
+    
+    if(j %in% rules[,1] & input[j] > 0){
+      
+      split_j1 = paste0(gsub(".$", "", j), rules[rules[,1]==j,2])
+      split_j2 = paste0(rules[rules[,1]==j,2], gsub("^.", "", j))
+      
+      new_input[split_j1] = sum(new_input[split_j1], 1, na.rm = T)
+      new_input[split_j2] = sum(new_input[split_j2], 1, na.rm = T)
+      
+      new_input[j] = new_input[j] - 1
+      
+    }
+    
+  }
+  
+  input = new_input 
+
+}
+
+input = input[input>0]
+
+input_letters = c()
+
+for(i in 1:length(input)){
+  
+  split_i1 = gsub(".$", "", names(input)[i])
+  split_i2 = gsub("^.", "", names(input)[i])
+  
+  input_letters[split_i1] = sum(input_letters[split_i1], input[i], na.rm = T)
+  input_letters[split_i2] = sum(input_letters[split_i2], input[i], na.rm = T)
+  
+}
+
+paste0(input)
+
+```
+

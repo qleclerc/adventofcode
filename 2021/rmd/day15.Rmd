@@ -1,0 +1,162 @@
+---
+title: "Advent of code 2021: day 4"
+author: "Quentin Leclerc"
+date: "04/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+https://adventofcode.com/2021/day/15
+
+In this puzzle, we have to figure out the "safest" path to get from the top-left to the bottom-right of a matrix. Each step will add risk depending on the value at the coordinates we are moving to. Rephrased, this is equivalent to saying that we want to find the fastest path, with the values at each coordinates representing the distance that must be crossed to reach that next location.
+
+## Solution
+
+After some digging and suggestions, I stumbled upon Dijkstra's shortest path algorithm, which seems perfect for this problem. I won't go too much into the details, but basically you start with the first node, look at its neighbours, and store the distance between each neighbour and the first node. You then look just at the  neighbours of these neighbours, and compute the new distance which is equal to the distance from the first node and its neighbour plus the distance from this neighbour to its own neighbours. Finally, you only store the shortest distance, as this represents the fastest path. 
+
+This is very optimal because you only need to check each node once, since the values going forward "remember" the shortest distance necessary to get from the origin to these new positions.
+
+```{r test_solution1}
+
+#matrix to store all the values
+input = as.matrix(read.fwf(here::here("2021", "inputs", "input15.txt"), widths = rep(1, 100)))
+
+#matrix to store the shortest distances between points and the origin
+#start by assuming the distance is infinite
+input_shortest = matrix(Inf, 100, 100)
+#set the first distance (from origin to origin) to 0
+input_shortest[1,1] = 0
+
+
+repeat{
+  
+  #only look at nodes for which the shortest distance to the origin has already been computed 
+  start_nodes = which(!(is.infinite(input_shortest)), arr.ind = T)
+  
+  #for each node...
+  for(i in 1:nrow(start_nodes)){
+    
+    #... figure out its neighbours
+    neighbours = list(c(start_nodes[i,1]+1, start_nodes[i,2]),
+                      c(start_nodes[i,1], start_nodes[i,2]+1))
+    
+    #for each neighbour...
+    for(j in neighbours){
+      
+      j = unlist(j)
+      #skip if the neighbour is off-limits
+      if(j[2] > 100 | j[1] > 100) next
+      
+      #calculate distance between node i and neighbour j PLUS shortest distance between node i and origin
+      dist = input_shortest[start_nodes[i,1], start_nodes[i,2]] + input[j[1], j[2]]
+      #only store this distance if it's smaller than the currently recorded distance
+      input_shortest[j[1], j[2]] = min(input_shortest[j[1], j[2]], dist)
+      
+    }
+    
+    #mark node i as "complete", so we won't be going over it again
+    input_shortest[start_nodes[i,1], start_nodes[i,2]] = Inf
+    
+  }
+  
+  #stop once we an estimate of the distance between origin and destination
+  if(!(is.infinite(input_shortest[100,100]))) break
+  
+}
+
+input_shortest[100,100]
+
+```
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+Same as above, but with a bigger matrix...
+
+## Solution
+
+Here's the confusing part: this solution still works with the example, but fails for the main puzzle input, and I have no idea why. It's telling me the shortest distance is 3001, whilst in reality it should be 2998...
+
+```{r test_solution2}
+
+input = as.matrix(read.fwf(here::here("2021", "inputs", "input15.txt"), widths = rep(1, 100)))
+
+#extend input matrix 5 times in both directions
+input = rbind(input, input+1)
+input[input > 9] = 1
+input = rbind(input, input[101:200,]+1)
+input[input > 9] = 1
+input = rbind(input, input[201:300,]+1)
+input[input > 9] = 1
+input = rbind(input, input[301:400,]+1)
+input[input > 9] = 1
+
+input = cbind(input, input+1)
+input[input > 9] = 1
+input = cbind(input, input[,101:200]+1)
+input[input > 9] = 1
+input = cbind(input, input[,201:300]+1)
+input[input > 9] = 1
+input = cbind(input, input[,301:400]+1)
+input[input > 9] = 1
+
+
+input_shortest = matrix(Inf, 500, 500)
+input_shortest[1,1] = 0
+
+
+repeat{
+  
+  #only look at nodes for which the shortest distance to the origin has already been computed 
+  start_nodes = which(!(is.infinite(input_shortest)), arr.ind = T)
+  
+  #for each node...
+  for(i in 1:nrow(start_nodes)){
+    
+    #... figure out its neighbours
+    neighbours = list(c(start_nodes[i,1]+1, start_nodes[i,2]),
+                      c(start_nodes[i,1], start_nodes[i,2]+1))
+    
+    #for each neighbour...
+    for(j in neighbours){
+      
+      j = unlist(j)
+      #skip if the neighbour is off-limits
+      if(j[2] > 500 | j[1] > 500) next
+      
+      #calculate distance between node i and neighbour j PLUS shortest distance between node i and origin
+      dist = input_shortest[start_nodes[i,1], start_nodes[i,2]] + input[j[1], j[2]]
+      #only store this distance if it's smaller than the currently recorded distance
+      input_shortest[j[1], j[2]] = min(input_shortest[j[1], j[2]], dist)
+      
+    }
+    
+    #mark node i as "complete", so we won't be going over it again
+    input_shortest[start_nodes[i,1], start_nodes[i,2]] = Inf
+    
+  }
+  
+  #stop once we an estimate of the distance between origin and destination
+  if(!(is.infinite(input_shortest[500,500]))) break
+  
+}
+
+input_shortest[500,500]
+#here's the bug - this is telling me that the shortest distance is 3001, but the correct answer for me was 2998...
+
+
+```
+
