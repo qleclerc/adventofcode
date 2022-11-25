@@ -1,0 +1,58 @@
+---
+title: "Advent of code 2022: day 1"
+author: "Quentin Leclerc"
+date: "01/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+
+
+## Solution
+
+
+
+```{r test_solution1}
+
+
+```
+
+
+```{r result1}
+
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+
+
+## Solution
+
+
+```{r test_solution2}
+
+
+```
+
+
+```{r result2}
+
+
+```
+
