@@ -15,18 +15,35 @@ knitr::opts_chunk$set(echo = TRUE)
 
 https://adventofcode.com/2022/day/1
 
+In this first challenge, the aim is essentially to break up a vector into smaller vectors (using empty spaces
+as the separators), sum up each small vector, and return the largest sum.
+
+... However, I completely failed to identify how to break up the vector (maybe using 'split()' or 'cut()'??)
+so instead I used a very ugly but straightforward loop :(
+
+Oh well, if it works, it's still a valid solution I guess!
+
 ## Solution
 
 
 ```{r test_solution1}
 
+input = as.numeric(readLines(here::here("2022", "inputs", "input1.txt")))
 
-```
+s = 0 #for current chunk sum
+tot = 0 #to store all chunk sums
 
-And now with the puzzle input:
+#keep adding to chunk, except if the value is NA, in which case move to the next chunk
+for(i in 1:length(input)){
+  if(!is.na(input[i])) s = s+input[i]
+  else{
+    tot = c(tot, s)
+    s = 0
+  }
+}
 
-```{r result1}
-
+#return the max sum of chunks
+max(tot)
 
 ```
 
@@ -34,20 +51,16 @@ And now with the puzzle input:
 
 # Part 2
 
+## Challenge
+
+The second part can be easily obtained from the first, since I worked out all the sums.
+Here, I just sort all the sums, take the 3 biggest, and add them up.
+
 ## Solution
-
-
-Testing with the example...
-
-```{r test_solution2}
-
-
-```
-
-And now with the puzzle input:
 
 ```{r result2}
 
+sum(tail(sort(tot),3))
 
 ```
 
