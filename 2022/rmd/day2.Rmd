@@ -1,0 +1,103 @@
+---
+title: "Advent of code 2022: day 2"
+author: "Quentin Leclerc"
+date: "02/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+Today, we're playing rock-paper-scissors!
+So, let's figure out how to use the information provided to *definitely not cheat*...
+Long stoy short, my solution here is to convert letters to numbers, then work out the difference between my
+opponent's and my numbers, and use that to figure out who wins.
+
+Here I tried to avoid using a loop, so instead I applied a few conditional replacements to get my solution.
+I'm also trying to stick to base R, so ended up using the base pipe `|>` and nothing from `dplyr` like `mutate()`,
+which would have made my life way easier.
+
+## Solution
+
+
+```{r result1}
+
+input = readLines(here::here("2022", "inputs", "input2.txt")) |>
+  strsplit(" ") |>
+  unlist() |>
+  matrix(ncol = 2, byrow = T)
+
+input = gsub("X", "A", input)
+input = gsub("Y", "B", input)
+input = gsub("Z", "C", input)
+
+input = gsub("A", "1", input)
+input = gsub("B", "2", input)
+input = gsub("C", "3", input)
+
+input = apply(input, c(1,2), as.numeric)
+
+input = cbind(input, input[,1]-input[,2])
+
+input[input[,3]==0, 3] = 3
+input[input[,3]==2, 3] = 6
+input[input[,3]==1, 3] = 0
+input[input[,3]==-1, 3] = 6
+input[input[,3]==-2, 3] = 0
+
+sum(input[,c(2,3)])
+
+```
+
+
+
+
+# Part 2
+
+## Challenge
+
+Part 2 is the same logic, but flipped problem: we now have the outcome (win, lose, draw),
+and have to figure out the input (rock, paper, scissors).
+So I'm again using a similar logic with some conditional reformatting, although I feel there must be something 
+cleaner to do with `%%`, hmm...
+
+## Solution
+
+
+```{r result2}
+
+input = readLines(here::here("2022", "inputs", "input2.txt")) |>
+  strsplit(" ") |>
+  unlist() |>
+  matrix(ncol = 2, byrow = T)
+
+input = gsub("X", "0", input)
+input = gsub("Y", "3", input)
+input = gsub("Z", "6", input)
+
+input = gsub("A", "1", input)
+input = gsub("B", "2", input)
+input = gsub("C", "3", input)
+
+input = apply(input, c(1,2), as.numeric)
+
+input = cbind(input, 0)
+
+input[input[,2]==3, 3] = input[input[,2]==3, 1]
+
+input[input[,2]==6, 3] = input[input[,2]==6, 1]+1
+input[input[,3]==4, 3] = 1
+
+input[input[,2]==0, 3] = input[input[,2]==0, 1]-1
+input[input[,3]==0, 3] = 3
+
+sum(input[,c(2,3)])
+
+
+```
+
