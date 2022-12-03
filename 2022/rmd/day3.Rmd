@@ -1,0 +1,92 @@
+---
+title: "Advent of code 2022: day 3"
+author: "Quentin Leclerc"
+date: "03/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+Today's challenge is about finding matching characters, so I suppose the solution
+has something to do with `match()`.
+
+Unfortunately, I couldn't figure out how to do this without a loop... Maybe some sort
+of `apply()` approach would have worked, but here speed was not a problem so I just
+went with the loop.
+
+The idea is straightforward: for each line (ie each bag), split it into two compartments,
+then search for the matching character between the compartments (using `pmatch()` to only
+compare once and go faster). Last step is to convert the matching letter to a value,
+for which I can conveniently use the `letters` and `LETTERS` objects included in base `R`.
+
+## Solution
+
+
+```{r result1}
+
+input = readLines(here::here("2022", "inputs", "input3.txt"))
+
+tot = 0
+
+for(i in 1:length(input)){
+  input_i = unlist(strsplit(input[i], ""))
+  i1 = input_i[1:(length(input_i)/2)]
+  i2 = input_i[(length(input_i)/2+1):length(input_i)]
+  
+  input_i = i2[pmatch(i1,i2)]
+  input_i = input_i[!is.na(input_i)][1]
+  
+  input_i = match(input_i, c(letters,LETTERS))
+  tot = tot+input_i
+}
+
+tot
+
+```
+
+
+
+
+# Part 2
+
+## Challenge
+
+Exactly the same problem as Part 1 (finding a unique, matching character), but now
+we're comparing 3 bags instead of 2 compartments. So, just need to add one extra step
+to the loop, first comparing bags 1 and 2, then comparing this comparison with bag 3.
+
+
+## Solution
+
+
+```{r result2}
+
+input = readLines(here::here("2022", "inputs", "input3.txt"))
+
+tot = 0
+
+for(i in seq(1, length(input), 3)){
+  input_1 = unlist(strsplit(input[i], ""))
+  input_2 = unlist(strsplit(input[i+1], ""))
+  input_3 = unlist(strsplit(input[i+2], ""))
+  
+  input_i = input_2[pmatch(input_1,input_2)]
+  input_i = input_i[!is.na(input_i)]
+  
+  input_i = input_3[pmatch(input_i,input_3)]
+  input_i = input_i[!is.na(input_i)][1]
+  
+  input_i = match(input_i, c(letters,LETTERS))
+  tot = tot+input_i
+}
+
+tot
+
+```
+
