@@ -13,34 +13,46 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Challenge
 
+The problem today is about looping through a vector of letters, and stopping as 
+soon as 4 adjacent letters are different. My solution is therefore just a loop to do
+exactly that! It's the solution I'm most proud of this year so far, the `break`
+statement in the loop is nice for efficiency to avoid going through the entire
+vector, and `length(unique())` is very convenient to check if all characters in
+the sequence are unique.
 
+Plus, you just need to replace 4 by 14 and 3 by 13 for it to work in Part 2!
 
 ## Solution
 
 
-
 ```{r result1}
 
+input = strsplit(readLines(here::here("2022", "inputs", "input6.txt")), "")[[1]]
+
+for(i in (4:length(input))){
+  if(length(unique(input[(i-3):i])) == 4) break
+}
+
+i
 
 ```
 
 
 
-
-
-
-
 # Part 2
-
-## Challenge
-
-
 
 ## Solution
 
 
 ```{r result2}
 
+input = strsplit(readLines(here::here("2022", "inputs", "input6.txt")), "")[[1]]
+
+for(i in (14:length(input))){
+  if(length(unique(input[(i-13):i])) == 14) break
+}
+
+i
 
 ```
 
