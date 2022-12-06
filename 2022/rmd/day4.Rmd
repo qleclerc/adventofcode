@@ -41,6 +41,7 @@ for(i in input){
 
 }
 
+n_pairs
 
 ```
 
@@ -79,6 +80,8 @@ for(i in input){
   }
 
 }
+
+n_pairs
 
 ```
 
