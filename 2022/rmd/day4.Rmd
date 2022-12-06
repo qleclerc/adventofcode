@@ -1,0 +1,84 @@
+---
+title: "Advent of code 2022: day 4"
+author: "Quentin Leclerc"
+date: "04/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+Straightforward challenge today (feels like the difficulty is a bit of a rollercoaster this year??),
+we have to figure out if, given two sequences, either is contained fully into the other.
+The input is conveniently formatted, so a bit of `gsub()` to remove all non-numerics does the trick
+to then extract the numbers defining the sequences. Once that's done, just need to check if either is
+contained in the other using `is.element()` and `all()`.
+
+## Solution
+
+
+```{r result1}
+
+input = readLines(here::here("2022","inputs","input4.txt"))
+
+n_pairs = 0
+
+for(i in input){
+  
+  i = gsub("\\D", " ", i) |>
+    strsplit(" ") |>
+    unlist() |>
+    as.numeric()
+  
+  if(all(is.element(c(i[1]:i[2]),c(i[3]:i[4]))) || all(is.element(c(i[3]:i[4]),c(i[1]:i[2])))){
+    n_pairs = n_pairs+1
+  }
+
+}
+
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+Now we want to know if there's any overlap at all between sequences, which is arguably
+easier than Part 1. Same logic as above for the formatting, but now we can just
+use `intersect()` to see if the sequences have anything in common!
+
+## Solution
+
+
+```{r result2}
+
+input = readLines(here::here("2022","inputs","input4.txt"))
+
+n_pairs = 0
+
+for(i in input){
+  
+  i = gsub("\\D", " ", i) |>
+    strsplit(" ") |>
+    unlist() |>
+    as.numeric()
+  
+  if(length(intersect(c(i[1]:i[2]), c(i[3]:i[4]))) > 0){
+    n_pairs = n_pairs+1
+  }
+
+}
+
+```
+

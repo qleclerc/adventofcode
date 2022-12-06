@@ -1,0 +1,116 @@
+---
+title: "Advent of code 2022: day 5"
+author: "Quentin Leclerc"
+date: "05/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+## Challenge
+
+A frustrating challenge today - although I'm quite happy with my solution, I couldn't figure out how
+to manipulate the input properly to extract the data... Since I ran out of time, I just manually
+set up the data for the stacks of crates :(
+
+Once it's set up this way however, the solution takes advantage of vector manipulation to "move"
+the last item (ie crate) from one vector (ie stack) to the end of another vector. For this,
+`tail()` is useful since you can manually choose how many elements you want to take from the
+end of the vector (convenient for Part 2!)
+
+## Solution
+
+
+```{r result1}
+
+input = readLines(here::here("2022","inputs","input5.txt"))
+
+#sadly, this manual setup means my solution isn't fully reproducible...
+stacks = list(c("W","B","D","N","C","F","J"),
+              c("P","Z","V","Q","L","S","T"),
+              c("P","Z","B","G","J","T"),
+              c("D","T","L","J","Z","B","H","C"),
+              c("G","V","B","J","S"),
+              c("P","S","Q"),
+              c("B","V","D","F","L","M","P","N"),
+              c("P","S","M","F","B","D","L","R"),
+              c("V","D","T","R"))
+
+input = input[-c(1:10)]
+
+for(instruct in input){
+  
+  instruct = gsub("[a-z]+ ", "", instruct) |>
+    strsplit(" ") |>
+    unlist() |>
+    as.numeric()
+  
+  for(i in 1:instruct[1]){
+    stacks[[instruct[3]]] = c(stacks[[instruct[3]]], tail(stacks[[instruct[2]]],1))
+    stacks[[instruct[2]]] = stacks[[instruct[2]]][-length(stacks[[instruct[2]]])]
+  }
+  
+}
+
+lapply(stacks, function(x) tail(x,1)) |>
+  unlist()
+
+```
+
+
+
+
+
+
+
+# Part 2
+
+## Challenge
+
+The only difference here is that instead of moving one crate at a time, repeated n times,
+now we're moving n crates at a time. This means we can just adjust the argument in `tail()`
+to move the required number of crates, then use `head()` to update the stack from which
+the crates were moved.
+
+
+## Solution
+
+
+```{r result2}
+
+input = readLines(here::here("2022","inputs","input5.txt"))
+
+stacks = list(c("W","B","D","N","C","F","J"),
+              c("P","Z","V","Q","L","S","T"),
+              c("P","Z","B","G","J","T"),
+              c("D","T","L","J","Z","B","H","C"),
+              c("G","V","B","J","S"),
+              c("P","S","Q"),
+              c("B","V","D","F","L","M","P","N"),
+              c("P","S","M","F","B","D","L","R"),
+              c("V","D","T","R"))
+
+input = input[-c(1:10)]
+
+for(instruct in input){
+  
+  instruct = gsub("[a-z]+ ", "", instruct) |>
+    strsplit(" ") |>
+    unlist() |>
+    as.numeric()
+  
+  stacks[[instruct[3]]] = c(stacks[[instruct[3]]], tail(stacks[[instruct[2]]],instruct[1]))
+  stacks[[instruct[2]]] = head(stacks[[instruct[2]]], length(stacks[[instruct[2]]])-instruct[1])
+  
+}
+
+lapply(stacks, function(x) tail(x,1)) |>
+  unlist()
+
+
+```
+
